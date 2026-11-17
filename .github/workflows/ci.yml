@@ -1,0 +1,33 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  schedule:
+    - cron: '0 0 * * 1' # weekly: catch broken external links
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - name: Check build output
+        run: test -f dist/index.html && test -f dist/privacy/index.html
+      - name: Link check
+        uses: lycheeverse/lychee-action@v2
+        with:
+          # mailto and the production-only /privacy route are handled by the local dist check
+          args: --no-progress --exclude-mail --root-dir "$PWD/dist" 'dist/**/*.html'
+          fail: true
+      - name: Lighthouse CI
+        run: npx --yes @lhci/cli@0.14.x autorun
