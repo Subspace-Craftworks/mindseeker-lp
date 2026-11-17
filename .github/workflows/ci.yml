@@ -26,8 +26,8 @@ jobs:
       - name: Link check
         uses: lycheeverse/lychee-action@v2
         with:
-          # mailto and the production-only /privacy route are handled by the local dist check
-          args: --no-progress --exclude-mail --root-dir "$PWD/dist" 'dist/**/*.html'
+          # mailto is skipped by default; root-dir resolves /privacy against dist
+          args: --no-progress --root-dir "${{ github.workspace }}/dist" 'dist/**/*.html'
           fail: true
       - name: Lighthouse CI
         run: npx --yes @lhci/cli@0.14.x autorun
